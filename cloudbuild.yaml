@@ -26,7 +26,7 @@ steps:
     args:
       - '-c'
       - |
-        helm --namespace=sandbox upgrade --install chat-app chat-app -f comments-app/values.yaml --set image.tag=$SHORT_SHA,ingress.hosts[0].host=chat-app.wuhsun.com
+        helm --namespace=sandbox upgrade --install chat-app -f comments-app/values.yaml --set image.tag=$SHORT_SHA,ingress.hosts[0].host=chat-app.wuhsun.com
     env:
       - 'CLOUDSDK_COMPUTE_ZONE=asia-east1-c'
       - 'CLOUDSDK_CONTAINER_CLUSTER=ben-site-prod'
