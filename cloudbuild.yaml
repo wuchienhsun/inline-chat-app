@@ -1,7 +1,6 @@
 steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     args: ['gsutil', 'cp', '-r', 'gs://comments-app/comments-app', './']
-    waitFor: ['pull-config']
     id: 'pull-helm-deploy'
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: /bin/sh
