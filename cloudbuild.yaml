@@ -1,0 +1,36 @@
+steps:
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args: ['gsutil', 'cp', '-r', 'gs://chat-app/chat-app', './']
+    waitFor: ['pull-config']
+    id: 'pull-helm-deploy'
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: /bin/sh
+    args:
+      - '-c'
+      - |
+        docker build -t gcr.io/$PROJECT_ID/chat-app:$SHORT_SHA .
+    waitFor: ['pull-helm-deploy']
+    id: 'build-chat-app-image'
+  - name: gcr.io/cloud-builders/gcloud
+    args:
+      [
+        'container',
+        'clusters',
+        'get-credentials',
+        'ben-site-prod',
+        '--region',
+        'asia-east1-c',
+      ]
+    id: 'prepare-credentials'
+  - name: 'gcr.io/$PROJECT_ID/helm'
+    entrypoint: /bin/sh
+    args:
+      - '-c'
+      - |
+        helm --namespace=sandbox upgrade --install chat-app chat-app -f chat-app/values.yaml --set image.tag=$SHORT_SHA,ingress.hosts[0].host=chat-app.wuhsun.com
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=asia-east1-c'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=ben-site-prod'
+    waitFor: ['build-chat-app-image', 'prepare-credentials', 'pull-helm-deploy']
+tags: ['cloud-builders-community']
+images: ['gcr.io/$PROJECT_ID/chat-app']
